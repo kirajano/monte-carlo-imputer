@@ -1,1 +1,5 @@
 *.csv
+testing.py
+notebook.ipynb
+__pycache__
+.ipynb_checkpoints
