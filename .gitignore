@@ -1,4 +1,5 @@
 *.csv
+code_testing.py
 testing.py
 notebook.ipynb
 __pycache__

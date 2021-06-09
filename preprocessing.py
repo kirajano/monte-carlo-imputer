@@ -3,7 +3,7 @@ import pandas as pd
 from itertools import count as cnt
 
 
-def nan_data(data, to_nan=0.2):
+def _nan_data(data, to_nan=0.2):
     """
     Define how many values will be set to NaN that are not and return indicies of existing NaNs.
     PARAMS:
@@ -23,7 +23,7 @@ def nan_data(data, to_nan=0.2):
 
 # Conditioning before randomizing
 # Randomly picking index to set to nan except existing nan
-def index_to_nan(data, existing_nans, to_nan):
+def _index_to_nan(data, existing_nans, to_nan):
     """
     Randomly picking index to set to nan except existing nan. NaNs applied to copy of dataset.
     PARAMS:
@@ -44,10 +44,10 @@ def index_to_nan(data, existing_nans, to_nan):
 
 # Conditioning after randomizing
 # Randomly picking index to set to nan except existing nan
-def index_to_nan_fast(data, existing_nans, to_nan):
+def _index_to_nan_fast(data, existing_nans, to_nan):
       """
       Randomly picking index to set to nan except existing nan. NaNs applied to copy of dataset.
-      Difference to above method, it uses an iterator and hence does store in-memory.
+      Difference to above method, it uses an iterator and hence is efficient for larger datasets.
       Advisable for large datasets.
       PARAMS:
       ---------------------------------

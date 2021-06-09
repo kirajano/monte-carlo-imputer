@@ -28,7 +28,7 @@ imputers = {"SimpleImputer":
             }
 
 
-def find_best_imputer(data, data_imp, index_nan, imputers=imputers):
+def _find_best_imputer(data, data_imp, index_nan, imputers=imputers):
     # Dict for storing results
     results = {}
     
@@ -103,7 +103,7 @@ def _simple_imputer(data, data_imp, params, index_nan):
             imputed = (SimpleImputer(strategy=strategy)
                         .fit_transform(np.asarray(data_imp).reshape(-1, 1)))
             imputed = pd.Series(imputed.flatten(), index=data_imp.index)
-            results["SimpleImputer" + "_" + strategy] = _compare(data, imputed, index_nan)
+            results["SimpleImputer" + "__" + strategy] = _compare(data, imputed, index_nan)
         return results
     except ValueError:
         print(f"Parameter {strategy} passed to \"Simple Imputer\" is not supported")
@@ -116,7 +116,7 @@ def _knn_imputer(data, data_imp, params, index_nan):
             imputed = (KNNImputer(weights=weights)
                         .fit_transform(np.asarray(data_imp).reshape(-1, 1)))
             imputed = pd.Series(imputed.flatten(), index=data.index)
-            results["KNNImputer" + "_" + weights] = _compare(data, imputed, index_nan)
+            results["KNNImputer" + "__" + weights] = _compare(data, imputed, index_nan)
         return results
     except ValueError:
         print(f"Parameter {weights} passed to \"KNN Imputer\" is not supported")
@@ -125,20 +125,29 @@ def _knn_imputer(data, data_imp, params, index_nan):
 def _interpolate(data, data_imp, params, index_nan):
     results = {}
     try:
+        # Interpolation happens in both direction (forward and backward)
         for method in params:
-            #if method == "time":
+            if method == "time":
+                # Creating copies since below index formating happens inplace
+                # and breaks the index formating for other methods
+                data_imp_time = data_imp.copy()
+                data_time = data.copy()
                 # Applying datetime index formating for both data sets
                 # needed when both enter _compare and are can be sorted
-                # Interpolation happens in both direction (forward and backward)
-                #data_imp.index = pd.to_datetime(pd.to_timedelta(data_imp.index, unit="days"))
-                #data.index = pd.to_datetime(pd.to_timedelta(data.index, unit="days"))
-            #    imputed = data_imp.interpolate(method=method, limit_direction="both")
-            #else:
-            imputed = data_imp.interpolate(method=method, limit_direction="both")
-            results["Interpolate" + "_" + method] = _compare(data, imputed, index_nan)
+                data_imp_time.index = pd.to_datetime(pd.to_timedelta(data_imp_time.index, unit="days"))
+                data_time.index = pd.to_datetime(pd.to_timedelta(data_time.index, unit="days"))
+                imputed = data_imp_time.interpolate(method=method, limit_direction="both")
+                # Reverting index format back to original
+                imputed.reset_index(drop=True, inplace=True)
+                # deleting copies
+                del data_time, data_imp_time
+            else:
+                imputed = data_imp.interpolate(method=method, limit_direction="both")
+            results["Interpolate" + "__" + method] = _compare(data, imputed, index_nan)
         return results
     except ValueError:
-        print(f"Parameter \"{method}\" passed to \"Interpolate\" is not supported")
+        print(f"Parameter \"{method}\" passed to \"Interpolate\" is not supported \
+            or encounted and error.")
 
 # Interpolation with order of magnitude
 def _interpolate_with_order(data, data_imp, params, index_nan, order=2):
@@ -148,7 +157,7 @@ def _interpolate_with_order(data, data_imp, params, index_nan, order=2):
     try:
         for method in params:
             imputed = data_imp.interpolate(method=method, limit_direction="both", order=order)
-            results["Interpolate_with_order" + "_" + method] = _compare(data, imputed, index_nan)
+            results["Interpolate_with_order" + "__" + method] = _compare(data, imputed, index_nan)
         return results
     except ValueError:
         print(f"Parameter {method} passed to \"Interpolate with order\" is not supported")
@@ -184,12 +193,12 @@ def _moving_win_imputer(data, data_imp, params, index_nan):
                 # Intersecting NaNs without the remainder to run compare
                 index_nan_adj = np.intersect1d(index_nan, data.reset_index(drop=True)
                                             .index[:remainder])
-                results["Moving_Win_Imputer" + "_" + str(wsize)] = _compare(data, imputed, 
+                results["Moving_Win_Imputer" + "__" + str(wsize)] = _compare(data, imputed, 
                                                                     index_nan=index_nan_adj)
             # If no remainder - take all train data
             else:
                 imputed = pd.Series(imputed.flatten(), index=data.index)
-                results["Moving_Win_Imputer" + "_" + str(wsize)] = _compare(data, imputed,
+                results["Moving_Win_Imputer" + "__" + str(wsize)] = _compare(data, imputed,
                                                                     index_nan=index_nan_adj)
         return results
     except AssertionError:
@@ -215,5 +224,5 @@ def _return_best_method(results):
     best_method = ""
     for k, v in results.items():
         if v == min(results.values()):
-            best_method = (f"{k}: {v:.5f}")
+            best_method = (f"{k}: {v:.3f}")
     return best_method
