@@ -23,7 +23,7 @@ imputers = {"SimpleImputer":
             "TimeSeries_LOCF": None,
             "Moving_Win_Imputer":
                         # Moving Window uses uneven window lengths
-                        # default is 3, 5, 7 ... 15 
+                        # default is 3, 5, 7 ... 15 (could be extended if needed)
                         [x for x in range(3,16) if x % 2 != 0]
             }
 
