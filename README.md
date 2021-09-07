@@ -3,11 +3,11 @@
 
 
 # Monte Carlo Imputation
-The repo contains functions that utilize most imputation methods on any 1D dataset and help to choose the best through high number of iterations like a Monte Carlo Simulation to help to understand an unknown distribution (hence the best imputation method).
+The repo contains functional code that utilize most imputation methods on a 1D dataset. The end result is to choose the best imputation method through high number of iterations using Monte Carlo Simulation in order to help to understand an unknown(or fully known) distribution. This would hence be the best imputation method.
 
 ## Description
 
-Imputation and its method selection is one of the biggest problems when doing data preprocessing to handle missing values.
+Imputation and its method selection is one of the challenges when doing data preprocessing to handle missing values.
 The one thing that makes it challenging that there are different strategies to it.
 But as with many things when working in machine learning with tabular data: no clear or solid guideline what method to use when. 
 This comes mainly from the fact you can apply guessing how the missing data looks like but in reality it could be completely different.
